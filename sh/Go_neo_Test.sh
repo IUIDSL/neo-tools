@@ -14,7 +14,13 @@ DBHOST="cheminfov.informatics.indiana.edu"
 #
 cwd=$(pwd)
 #
-if [ "$(which cypher-shell)" ]; then
+if [ "$(which neo4j-client)" ]; then
+	CQLAPP="neo4j-client"
+	printf "CQLAPP = %s\n" "$CQLAPP"
+	#
+	$CQLAPP -i ${CQLFILE} "$DBHOST"
+	#
+elif [ "$(which cypher-shell)" ]; then
 	CQLAPP="cypher-shell"
 	printf "CQLAPP = %s\n" "$CQLAPP"
 	#
@@ -22,12 +28,6 @@ if [ "$(which cypher-shell)" ]; then
 		--non-interactive \
 		--format "plain" \
 		<${CQLFILE}
-	#
-elif [ "$(which neo4j-client)" ]; then
-	CQLAPP="neo4j-client"
-	printf "CQLAPP = %s\n" "$CQLAPP"
-	#
-	$CQLAPP -i ${CQLFILE} "$DBHOST"
 	#
 else
 	echo "ERROR: Neo4j/CQL client app not found."

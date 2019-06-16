@@ -14,6 +14,12 @@ sudo apt install neo4j
 sudo apt install neo4j-client
 ```
 
+## neo4j-client
+
+This is 3rd party package available for various systems. See
+
+* <https://neo4j-client.net/>
+
 ### neo4j.conf
 
 Some important options:
