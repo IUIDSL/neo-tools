@@ -6,6 +6,7 @@
 #
 if [ $# -lt 1 ]; then
 	printf "ERROR: Syntax: %s CQLFILE\n" $(basename $0)
+	exit
 else
 	CQLFILE=$1
 fi
