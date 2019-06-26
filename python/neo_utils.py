@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 #############################################################################
 ### https://py2neo.org/
+### https://py2neo.org/v4/database.html
 #############################################################################
 import sys,os,argparse,json
+import pandas
 import py2neo
 
 DBHOST="localhost"
@@ -28,12 +30,20 @@ def DbSummary(db, verbose):
   print('nodes: %d; relationships: %d'%(len(g.nodes), len(g.relationships)), file=sys.stderr)
 
 #############################################################################
-def DbQuery(db, cql, verbose):
+def DbQuery(db, cql, fmt, fout, verbose):
   g = db.default_graph
-  cur = g.run(cql)
-  data = cur.data()
-  print(str(data))
-  #df = cur.to_data_frame()
+  if fmt.upper()=='JSON':
+    rows = g.run(cql).data()
+    fout.write(json.dumps(rows, indent=2)+'\n')
+    print('rows: %d'%(len(rows)), file=sys.stderr)
+
+    ### How to get keys/dict?
+    #for row in g.run(cql):
+    #  fout.write(json.dumps(row, indent=2))
+  else:
+    df = g.run(cql).to_data_frame()
+    df.to_csv(fout, '\t', index=False)
+    print('rows: %d'%(df.shape[0]), file=sys.stderr)
 
 #############################################################################
 if __name__=='__main__':
@@ -43,7 +53,8 @@ if __name__=='__main__':
   parser.add_argument("op", choices=ops, help='operation')
   parser.add_argument("--i", dest="ifile", help="input query file (CQL aka Cypher)")
   parser.add_argument("--cql", help="input query (CQL aka Cypher)")
-  parser.add_argument("--o", dest="ofile", help="output (TSV)")
+  parser.add_argument("--o", dest="ofile", help="output (TSV|JSON)")
+  parser.add_argument("--ofmt", choices=('TSV', 'JSON'), default='TSV')
   parser.add_argument("--dbhost", default=DBHOST)
   parser.add_argument("--dbport", type=int, default=DBPORT)
   parser.add_argument("--dbscheme", default=DBSCHEME)
@@ -53,6 +64,11 @@ if __name__=='__main__':
   args = parser.parse_args()
 
   PROG=os.path.basename(sys.argv[0])
+
+  if args.ofile:
+    fout = open(args.ofile, "w")
+  else:
+    fout = sys.stdout
 
   try:
     db = py2neo.Database(host=args.dbhost, port=args.dbport, scheme=args.dbscheme, secure=False, user=args.dbuser, password=args.dbpw)
@@ -68,13 +84,12 @@ if __name__=='__main__':
   elif args.op == 'query':
     if args.ifile:
       fin = open(args.ifile)
-      #cql = fin.read().decode('utf-8')
       cql = fin.read()
     elif args.cql:
       cql = args.cql
     else:
       parser.error('--cql or --i required for query.')
-    DbQuery(db, cql, args.verbose)
+    DbQuery(db, cql, args.ofmt, fout, args.verbose)
 
   else:
     parser.error('Unsupported operation: %s'%args.op)
