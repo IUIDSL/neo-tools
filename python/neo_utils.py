@@ -2,7 +2,7 @@
 #############################################################################
 ### https://py2neo.org/
 #############################################################################
-import sys,os,argparse
+import sys,os,argparse,json
 import py2neo
 
 DBHOST="localhost"
@@ -10,6 +10,28 @@ DBPORT=7687
 DBSCHEME="bolt"
 DBUSER="neo4j"
 DBPW="neo4j"
+
+#############################################################################
+def DbInfo(db, verbose):
+  print('db.uri: %s'%(str(db.uri)), file=sys.stderr)
+  print('db.name: %s'%(db.name), file=sys.stderr)
+  print('db.default_graph: %s'%(str(db.default_graph)), file=sys.stderr)
+  print('db.product: %s'%(str(db.product)), file=sys.stderr)
+  if verbose:
+    print('db.config: %s'%(str(db.config)), file=sys.stderr)
+
+#############################################################################
+def DbSummary(db, verbose):
+  DbInfo(db, verbose)
+  print('db.kernel_version: %s'%(str(db.kernel_version)), file=sys.stderr)
+  print('db.primitive_counts: %s'%(str(db.primitive_counts)), file=sys.stderr)
+  print('nodes: %d; relationships: %d'%(len(g.nodes), len(g.relationships)), file=sys.stderr)
+
+#############################################################################
+def DbQuery(db, cql, verbose):
+  g = db.default_graph
+  result=g.data(cql)
+  print(str(result))
 
 #############################################################################
 if __name__=='__main__':
@@ -36,27 +58,20 @@ if __name__=='__main__':
     parser.error('%s'%(e))
 
   if args.op == 'dbinfo':
-    print('db.uri: %s'%(str(db.uri)), file=sys.stderr)
-    print('db.name: %s'%(db.name), file=sys.stderr)
-    print('db.default_graph: %s'%(str(db.default_graph)), file=sys.stderr)
-    print('db.product: %s'%(str(db.product)), file=sys.stderr)
+    DbInfo(db, args.verbose)
 
   elif args.op == 'dbsummary':
+    DbSummary(db, args.verbose)
 
-    g = db.default_graph
-    print('nodes %d'%(len(g.nodes)), file=sys.stderr)
-
-    # db.config
-    # dictionary of the configuration parameters used to configure Neo4j.
-    #print('db.config: %s'%(str(db.config)), file=sys.stderr)
-
-    # db.kernel_version
-    # version of Neo4j.
-    #print('db.kernel_version: %s'%(str(db.kernel_version)), file=sys.stderr)
-
-    # db.primitive_counts
-    # dictionary of estimates of the numbers of different kinds of Neo4j primitives.
-    #print('db.primitive_counts: %s'%(str(db.primitive_counts)), file=sys.stderr)
+  elif args.op == 'query':
+    if args.ifile:
+      fin = open(args.ifile)
+      cql = fin.read().decode('utf-8')
+    elif args.cql:
+      cql = args.cql
+    else:
+      parser.error('--cql or --i required for query.')
+    DbQuery(db, cql, args.verbose)
 
   else:
     parser.error('Unsupported operation: %s'%args.op)
