@@ -30,8 +30,10 @@ def DbSummary(db, verbose):
 #############################################################################
 def DbQuery(db, cql, verbose):
   g = db.default_graph
-  result=g.data(cql)
-  print(str(result))
+  cur = g.run(cql)
+  data = cur.data()
+  print(str(data))
+  #df = cur.to_data_frame()
 
 #############################################################################
 if __name__=='__main__':
@@ -66,7 +68,8 @@ if __name__=='__main__':
   elif args.op == 'query':
     if args.ifile:
       fin = open(args.ifile)
-      cql = fin.read().decode('utf-8')
+      #cql = fin.read().decode('utf-8')
+      cql = fin.read()
     elif args.cql:
       cql = args.cql
     else:
