@@ -4,12 +4,7 @@ MATCH (d:Phenotype)--(o)
 	RETURN d.label, count(*) AS degree
 	ORDER BY degree DESC ;
 
-MATCH (d:Phenotype)-[]->(o)
-	WHERE d.label CONTAINS 'Parkinson'
-	RETURN d.label, o.nodeType, count(*) AS degree
-	ORDER BY degree DESC ;
-
-MATCH (d:Phenotype)-[r]->()
+MATCH (d:Phenotype)-[r]-()
 	WHERE d.label CONTAINS 'Parkinson'
 	RETURN d.label, type(r), count(*) AS degree
 	ORDER BY degree DESC ;
