@@ -6,5 +6,5 @@ WITH relationships(path) AS rel
 UNWIND rel AS relr
 WITH relr
 WHERE startNode(relr).id <> "GO:0005515" AND endNode(relr).id <> "GO:0005515"
-RETURN startNode(relr), relr, endNode(relr)
+RETURN startNode(relr).id, relr, endNode(relr)
 	;
