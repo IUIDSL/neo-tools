@@ -22,6 +22,7 @@ This is 3rd party package available for various systems. See
 
 ### neo4j.conf
 
+See [neo4j.conf](conf/neo4j/neo4j.conf).
 Some important options:
 
 ```
