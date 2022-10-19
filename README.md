@@ -1,4 +1,4 @@
-# neo-tools
+# Neo-Tools
 
 Code, tools, workflows and documentation for effective use of Neo4j.
 
